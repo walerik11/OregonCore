@@ -112,7 +112,8 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     owner.AddUnitState(UNIT_STATE_CHASE);
 
     Movement::MoveSplineInit init(owner);
-    init.MovebyPath(i_path->getFullPath());
+    //init.MovebyPath(i_path->getFullPath());
+	init.MoveTo(x, y, z, true);
     init.SetWalk(((D*)this)->EnableWalking(owner));
     static_cast<D*>(this)->_updateSpeed(owner);
 
