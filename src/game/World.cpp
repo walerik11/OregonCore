@@ -1016,6 +1016,8 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_PET_LOS] = enablePetLOS;
     m_configs[CONFIG_VMAP_TOTEM] = sConfig.GetBoolDefault("vmap.totem", false);
     m_configs[CONFIG_MAX_WHO] = sConfig.GetIntDefault("MaxWhoListReturns", 49);
+	m_configs[FAKE_WHO_MULT] = sConfig.GetIntDefault("FakeWhoList.Multiple", 1);
+	m_configs[FAKE_WHO_ADD] = sConfig.GetIntDefault("FakeWhoList.Add", 0);
 
     m_configs[CONFIG_BG_START_MUSIC] = sConfig.GetBoolDefault("MusicInBattleground", false);
     m_configs[CONFIG_START_ALL_SPELLS] = sConfig.GetBoolDefault("PlayerStart.AllSpells", false);

@@ -792,6 +792,10 @@ StrictPlayerNames = 0
 StrictCharterNames = 0
 StrictPetNames = 0
 MaxWhoListReturns = 49
+# Множитель кол-ва игроков онлайн. Число в итоге может быть больше чем MaxWhoListReturns
+FakeWhoList.Multiple = 1
+# Слогаемое к кол-ву игроков онлайн. Число в итоге может быть больше чем MaxWhoListReturns
+FakeWhoList.Add = 0
 CharactersCreatingDisabled = 0
 CharactersPerAccount = 50
 CharactersPerRealm = 10
