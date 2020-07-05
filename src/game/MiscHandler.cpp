@@ -373,8 +373,8 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         ++displaycount;
     }
 
- uint32 fakeclientcount = (clientcount * sWorld.getConfig(FAKE_WHO_MULT) + sWorld.getConfig(FAKE_WHO_ADD));
- data.put(0, fakeclientcount); // insert right count, listed count
+ uint32 fakeclientcount = (displaycount * sWorld.getConfig(FAKE_WHO_MULT) + sWorld.getConfig(FAKE_WHO_ADD));
+ data.put(0, displaycount); // insert right count, listed count
  data.put(4, fakeclientcount); // insert right count, online count
 
     SendPacket(&data);
