@@ -269,7 +269,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 // If Fake WHO List system on then show player DND
                 if (sWorld.getConfig(CONFIG_FAKE_WHO_LIST))
                 {
-                    /*sWorld->*/SendWorldText(LANG_NOT_WHISPER);
+                    sWorld->SendWorldText(LANG_NOT_WHISPER);
                     return;
                 }
                 else
