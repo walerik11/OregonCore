@@ -7263,6 +7263,7 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
                 return *repRank;
     }
 
+
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
     {
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
@@ -7274,14 +7275,18 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
                     return REP_FRIENDLY;
 
                 // duel - always hostile to opponent
-                if ((selfPlayerOwner->duel && selfPlayerOwner->duel->opponent == targetPlayerOwner && selfPlayerOwner->duel->startTime != 0) || selfPlayerOwner->IsFFAPvP() && targetPlayerOwner->IsFFAPvP())
+                if (selfPlayerOwner->duel && selfPlayerOwner->duel->opponent == targetPlayerOwner && selfPlayerOwner->duel->startTime != 0)
                     return REP_HOSTILE;
 
                 // same group - checks dependant only on our faction - skip FFA_PVP for example
                 if (selfPlayerOwner->IsInRaidWith(targetPlayerOwner))
                     return REP_FRIENDLY; // return true to allow config option AllowTwoSide.Interaction.Group to work
-                    // however client seems to allow mixed group parties, because in 13850 client it works like:
-                    // return GetFactionReactionTo(GetFactionTemplateEntry(), target);
+                // however client seems to allow mixed group parties, because in 13850 client it works like:
+                // return GetFactionReactionTo(GetFactionTemplateEntry(), target);
+
+                // PvP FFA state
+                if (selfPlayerOwner->IsFFAPvP() && targetPlayerOwner->IsFFAPvP())
+                    return REP_HOSTILE;
             }
 
             if (selfPlayerOwner)
@@ -9643,41 +9648,33 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellEntry const* bySpell, W
 
     // PvP, PvC, CvP case
     // can't attack friendly targets
-    ReputationRank repThisToTarget = GetReactionTo(target);
-    ReputationRank repTargetToThis = target->GetReactionTo(this);
+    if (GetReactionTo(target) > REP_NEUTRAL
+        || target->GetReactionTo(this) > REP_NEUTRAL)
+        return false;
 
-    /*if (repThisToTarget > REP_NEUTRAL
-        || (repTargetToThis = target->GetReactionTo(this)) > REP_NEUTRAL)
-        return false; */
+    Player const* playerAffectingAttacker = HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? GetAffectingPlayer() : nullptr;
+    Player const* playerAffectingTarget = target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? target->GetAffectingPlayer() : nullptr;
 
     // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
-    if (repThisToTarget == REP_NEUTRAL &&
-        repTargetToThis <= REP_NEUTRAL)
+    if ((playerAffectingAttacker && !playerAffectingTarget) ||
+        (!playerAffectingAttacker && playerAffectingTarget))
     {
-        Player const* owner = GetAffectingPlayer();
-        const Unit* const thisUnit = owner ? owner : this;
+        Player const* player = playerAffectingAttacker ? playerAffectingAttacker : playerAffectingTarget;
+        Unit const* creature = playerAffectingAttacker ? target : this;
 
-        if (!(target->GetTypeId() == TYPEID_PLAYER && thisUnit->GetTypeId() == TYPEID_PLAYER) &&
-            !(target->GetTypeId() == TYPEID_UNIT && thisUnit->GetTypeId() == TYPEID_UNIT))
+        if (creature->IsContestedGuard() && player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
+            return true;
+
+        if (FactionTemplateEntry const* factionTemplate = creature->GetFactionTemplateEntry())
         {
-            Player const* player = target->GetTypeId() == TYPEID_PLAYER ? target->ToPlayer() : thisUnit->ToPlayer();
-            Unit const* creature = target->GetTypeId() == TYPEID_UNIT ? target : thisUnit;
+            if (!(player->GetReputationMgr().GetForcedRankIfAny(factionTemplate)))
+                if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction))
+                    if (FactionState const* repState = player->GetReputationMgr().GetState(factionEntry))
+                        if (!(repState->Flags & FACTION_FLAG_AT_WAR) && (!IsContestedGuard() && !player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP)))
+                            return false;
 
-            if (FactionTemplateEntry const* factionTemplate = creature->GetFactionTemplateEntry())
-            {
-                if (!(player->GetReputationMgr().GetForcedRankIfAny(factionTemplate)))
-                    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction))
-                        if (FactionState const* repState = player->GetReputationMgr().GetState(factionEntry))
-                            if (!(repState->Flags & FACTION_FLAG_AT_WAR))
-                                return false;
-
-            }
         }
-
     }
-
-    Player const* playerAffectingAttacker = HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? GetAffectingPlayer() : NULL;
-    Player const* playerAffectingTarget = target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? target->GetAffectingPlayer() : NULL;
 
     // check duel - before sanctuary checks
     if (playerAffectingAttacker && playerAffectingTarget)
@@ -12480,11 +12477,9 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellEntry cons
 
     // Aura info stored here
     Modifier* mod = aura->GetModifier();
-
     // Skip this auras
     if (isNonTriggerAura[mod->m_auraname])
         return false;
-
     // If not trigger by default and spellProcEvent == NULL - skip
     if (!isTriggerAura[mod->m_auraname] && spellProcEvent == NULL)
         return false;

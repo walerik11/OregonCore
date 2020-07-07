@@ -214,25 +214,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
     SetGoType(GameobjectTypes(goinfo->type));
     SetGoState(go_state);
 
-    switch (goinfo->type)
-    {
-    case GAMEOBJECT_TYPE_TRAP:
-        if (GetGOInfo()->trap.stealthed)
-        {
-            m_stealth.AddFlag(STEALTH_TRAP);
-            m_stealth.AddValue(STEALTH_TRAP, 70);
-        }
-
-        if (GetGOInfo()->trap.invisible)
-        {
-            m_invisibility.AddFlag(INVISIBILITY_TRAP);
-            m_invisibility.AddValue(INVISIBILITY_TRAP, 300);
-        }
-        break;
-    default:
-        SetGoAnimProgress(animprogress);
-        break;
-    }
+    SetGoAnimProgress(animprogress);
 
     SetUInt32Value(GAMEOBJECT_ARTKIT, artKit);
 
