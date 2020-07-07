@@ -17,7 +17,6 @@
 
 #include "AnticheatMgr.h"
 #include "Common.h"
-#include "Common.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
