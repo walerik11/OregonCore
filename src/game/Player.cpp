@@ -17,6 +17,7 @@
 
 #include "AnticheatMgr.h"
 #include "Common.h"
+#include "Common.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -20704,6 +20705,8 @@ bool Player::HasGlobalCooldown(SpellEntry const* spellInfo) const
 
 void Player::RemoveGlobalCooldown(SpellEntry const* spellInfo)
 {
+	 if (!spellInfo || !spellInfo->StartRecoveryTime)
+          return;
     m_globalCooldowns[spellInfo->StartRecoveryCategory] = 0;
 }
 
