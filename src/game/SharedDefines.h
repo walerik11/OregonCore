@@ -32,22 +32,6 @@ enum SpellEffIndex
 #define EFFECT_FIRST_FOUND 254
 #define EFFECT_ALL 255
 
-inline uint32 GetMaxLevelForExpansion(uint32 expansion)
-{
-    switch (expansion)
-    {
-        case EXPANSION_CLASSIC:
-            return 60;
-        case EXPANSION_THE_BURNING_CRUSADE:
-            return 70;
-        default:
-            break;
-    }
-    return 0;
-}
-
-
-
 enum Gender
 {
     GENDER_MALE                        = 0,
