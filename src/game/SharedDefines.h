@@ -32,7 +32,7 @@ enum SpellEffIndex
 #define EFFECT_FIRST_FOUND 254
 #define EFFECT_ALL 255
 
-/*inline uint32 GetMaxLevelForExpansion(uint32 expansion)
+inline uint32 GetMaxLevelForExpansion(uint32 expansion)
 {
     switch (expansion)
     {
@@ -44,7 +44,7 @@ enum SpellEffIndex
             break;
     }
     return 0;
-}*/
+}
 
 
 
